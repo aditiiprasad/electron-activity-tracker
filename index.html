@@ -1,12 +1,45 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Activity Tracker</title>
-</head>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Electron Activity Tracker</title>
+        <link rel="stylesheet" href="styles.css">
+      </head>
+            
 <body>
-  <h1>Activity Tracking App</h1>
-  <div id="log"></div>
+    <header>
+        Electron Activity Tracker
+        <div class="header-subtext">
+          Developed by <a href="https://www.linkedin.com/in/aditiiprasad/" target="_blank">Aditi</a> |
+          <a href="https://github.com/aditiiprasad/electron-activity-tracker" target="_blank">Source Code</a>
+        </div>
+      </header>
+      
+  <div id="logContainer">
+    <div class="logBox" id="activityBox">
+      <h3>Activity Logs</h3>
+      <div class="controls">
+        <button onclick="filterLogs('all')">All</button>
+        <button onclick="filterLogs('Mouse')">Mouse</button>
+        <button onclick="filterLogs('Keyboard')">Keyboard</button>
+        <button onclick="filterLogs('Scroll')">Scroll</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+      </div>
+      <ul id="activityList"></ul>
+    </div>
+
+    <div class="logBox" id="windowBox">
+      <h3>App Logs</h3>
+      <ul id="windowList"></ul>
+    </div>
+  </div>
+
+  <div id="dashboard">
+    <h3>Top Applications by Usage</h3>
+    <div id="topApps" class="top-app-list"></div>
+  </div>
+
   <script src="renderer.js"></script>
 </body>
 </html>

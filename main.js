@@ -1,87 +1,60 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const fs = require('fs');
 
-let activeWin; 
-let previousActiveWindow = null; 
-
-// Path for the log file
-const logFilePath = path.join(app.getPath('userData'), 'activity-log.json');
-
-let mainWindow;
-
-// Function to log the currently active window
-async function trackActiveWindow() {
-  try {
-    if (!activeWin) return;
-
-    const active = await activeWin();
-    if (!active) {
-      console.log('No active window detected.');
-      return;
-    }
-
-    // Compare current active window with the previous one
-    if (
-      !previousActiveWindow || 
-      active.owner.name !== previousActiveWindow.owner.name || 
-      active.title !== previousActiveWindow.title 
-    ) {
-      const activity = {
-        type: 'active-window',
-        details: `App: ${active.owner.name}, Title: ${active.title}`,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('Tracked active-window:', activity); 
-
-      
-      fs.appendFileSync(logFilePath, JSON.stringify(activity) + '\n');
-
-
-      if (mainWindow) {
-        mainWindow.webContents.send('activity', activity);
-      }
-
-      
-      previousActiveWindow = active;
-    }
-  } catch (err) {
-    console.error('Error tracking active window:', err);
-  }
-}
-
-// Handle activity events from renderer (like mouse clicks, scrolls, etc.)
-ipcMain.on('log-activity', (event, activity) => {
-  try {
-    fs.appendFileSync(logFilePath, JSON.stringify(activity) + '\n');
-  } catch (err) {
-    console.error('Error writing activity log:', err);
-  }
-});
-
-// Electron window
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
     }
   });
 
-  mainWindow.loadFile('index.html');
+  win.loadFile('index.html');
+
+  (async () => {
+    try {
+      const activeWinModule = await import('active-win');
+      const activeWindowSync = activeWinModule.activeWindowSync;
+      const appUsage = {};
+      let lastAppName = null;
+
+      setInterval(() => {
+        const aw = activeWindowSync();
+        if (aw && aw.owner && aw.owner.name) {
+          const appName = aw.owner.name;
+
+          // Track usage
+          appUsage[appName] = (appUsage[appName] || 0) + 1;
+
+          // Log change only if the active app has changed
+          if (appName !== lastAppName) {
+            win.webContents.send('active-app-name', appName);
+            lastAppName = appName;
+          }
+
+          // Send top 3 used apps
+          const topApps = Object.entries(appUsage)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 3)
+            .map(([name, time]) => ({ name, time }));
+          win.webContents.send('update-top-apps', topApps);
+        }
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to load active-win:', err);
+    }
+  })();
 }
 
-// Initialize app
-app.whenReady().then(async () => {
-  const activeWinModule = await import('active-win');
-  activeWin = activeWinModule.activeWindow;
+app.whenReady().then(createWindow);
 
-  createWindow();
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
 
-  //  tracking active window every 1 seconds
-  setInterval(trackActiveWindow, 1000); 
-
-  console.log('User‑data path:', app.getPath('userData'));
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
