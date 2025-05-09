@@ -1,0 +1,20 @@
+{
+  "name": "electron-activity-tracker",
+  "version": "1.0.0",
+  "description": "Watches what you do on your computer",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^36.2.0"
+  },
+  "dependencies": {
+    "active-win": "^9.0.0",
+    "robotjs": "^0.6.0"
+  }
+}
