@@ -2,3 +2,4 @@ node_modules/
 dist/
 build/
 *.exe
+activity_log.txt

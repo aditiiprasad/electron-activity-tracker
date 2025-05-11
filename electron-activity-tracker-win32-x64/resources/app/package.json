@@ -1,0 +1,22 @@
+{
+  "name": "electron-activity-tracker",
+  "version": "1.0.0",
+  "description": "Watches what you do on your computer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . electron-activity-tracker --platform=win32 --arch=x64 --overwrite"
+  },
+  "keywords": [],
+  "author": "Aditi",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^36.2.0",
+    "electron-builder": "^26.0.12",
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "active-win": "^9.0.0",
+    "robotjs": "^0.6.0"
+  }
+}

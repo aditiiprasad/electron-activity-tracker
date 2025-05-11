@@ -1,3 +1,4 @@
+// renderer.js
 function addLog(id, message, type = '') {
   const list = document.getElementById(id);
   if (!list) return;
@@ -20,17 +21,36 @@ function addLog(id, message, type = '') {
 
 // Mouse, Keyboard, Scroll 
 document.addEventListener('mousedown', (e) => {
+  const data = { x: e.clientX, y: e.clientY };
   addLog('activityList', `Mouse clicked at (${e.clientX}, ${e.clientY})`, 'Mouse');
+  
+  // Save to file via IPC
+  if (window.api) {
+    window.api.saveMouseActivity(data);
+  }
 });
 
 document.addEventListener('keydown', (e) => {
+  const data = { key: e.key };
   addLog('activityList', `Key pressed: ${e.key}`, 'Keyboard');
+  
+  // Save to file via IPC
+  if (window.api) {
+    window.api.saveKeyboardActivity(data);
+  }
 });
 
 window.addEventListener('wheel', (e) => {
   const direction = e.deltaY > 0 ? 'down' : 'up';
   const amount = Math.abs(e.deltaY);
+  const data = { direction, amount: amount.toFixed(0) };
+  
   addLog('activityList', `Scrolled ${direction} by ${amount.toFixed(0)}px`, 'Scroll');
+  
+  // Save to file via IPC
+  if (window.api) {
+    window.api.saveScrollActivity(data);
+  }
 });
 
 // Log window activity 
@@ -75,7 +95,7 @@ function updateTopApps(apps) {
   });
 }
 
-//  Filter & Clear 
+// Filter & Clear 
 function filterLogs(type) {
   const items = document.querySelectorAll('#activityList li');
   items.forEach(item => {
