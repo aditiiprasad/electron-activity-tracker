@@ -3,3 +3,4 @@ dist/
 build/
 *.exe
 activity_log.txt
+*.zip
